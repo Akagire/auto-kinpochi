@@ -1,0 +1,7 @@
+node_modules
+dist
+debug
+todaysjob.txt
+yarn-error.log
+.env
+mapping.json

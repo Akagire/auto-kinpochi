@@ -38,7 +38,7 @@ export const parser = (line: string): parsedRecord => {
 
     const diffMilisecs = end.diff(start);
 
-    if (diffMilisecs <= 0) throw new TypeError;
+    if (diffMilisecs <= 0) throw new TypeError('作業開始時刻が作業終了時刻を上回っている分報があるようです！');
 
     const diffMinutes = diffMilisecs / 1000 / 60;
 

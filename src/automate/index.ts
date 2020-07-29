@@ -84,7 +84,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   }
 
   // 承認ボタンクリック
-  await page.click('request-approval-all');
+  await page.click('#request-approval-all');
 
   await page.waitFor(4000);
 

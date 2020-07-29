@@ -12,7 +12,7 @@ require('dotenv').config();
   const lines = files.split('\n');
 
   // @ts-ignore
-  const [_, ...withoutHeaderLine] = lines;
+  const [date, ...withoutHeaderLine] = lines;
 
   const converted = withoutHeaderLine
     .filter((line) => {
@@ -27,5 +27,5 @@ require('dotenv').config();
   const summary = summaryMinutesByProject(restCompleted);
   const mappedSummary = mappingProjectCode(summary, mapping);
 
-  miteras(restCompleted, mappedSummary, '2020-07-20');
+  miteras(restCompleted, mappedSummary);
 })();

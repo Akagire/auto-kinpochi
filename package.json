@@ -6,6 +6,9 @@
   "author": "Takuya Eguchi",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "kinpochi": "node dist/index.js"
+  },
   "dependencies": {
     "dotenv": "^8.2.0",
     "moment": "^2.27.0",

@@ -6,6 +6,7 @@ import { miteras } from './automate';
 require('dotenv').config();
 
 (async () => {
+  const argDate = process.argv[2];
   const files = await fromFile('todaysjob.txt');
   const mapping = JSON.parse(await fromFile('mapping.json'));
 
@@ -27,5 +28,5 @@ require('dotenv').config();
   const summary = summaryMinutesByProject(restCompleted);
   const mappedSummary = mappingProjectCode(summary, mapping);
 
-  miteras(restCompleted, mappedSummary);
+  miteras(restCompleted, mappedSummary, argDate);
 })();

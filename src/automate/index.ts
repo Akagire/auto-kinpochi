@@ -23,7 +23,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.type('#username', process.env.EMAIL);
   await page.type('#password', process.env.PASSWORD);
   page.click('input.btnAction');
-  await page.waitFor(4000);
+  await page.waitFor(5000);
 
   // 指定日付の勤怠入力画面を開く
   await page.click(`td.table01__cell--status button[data-date="${today}"]`);

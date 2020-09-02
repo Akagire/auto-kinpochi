@@ -26,8 +26,7 @@ export const parser = (line: string): parsedRecord => {
     const startObj = workStart.split(':');
     const endObj = workEnd.split(':');
 
-    const now = dayjs();
-    const today = now.clone()
+    const today = dayjs()
         .hour(0)
         .minute(0)
         .second(0);

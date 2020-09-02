@@ -52,11 +52,11 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.type('input#work-time-out', end.format('HH:mm'));
 
   for (let i = 0; i < rests.length; i += 1) {
-    const restStartElems = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-in');
-    const restEndElems = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-out');
+    const restStartElms = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-in');
+    const restEndElms = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-out');
 
-    await restStartElems[i].type(rests[i].start.format('HH:mm'));
-    await restEndElems[i].type(rests[i].end.format('HH:mm'));
+    await restStartElms[i].type(rests[i].start.format('HH:mm'));
+    await restEndElms[i].type(rests[i].end.format('HH:mm'));
     await page.evaluate(() => {
       const inputs = document.querySelectorAll('input');
       inputs.forEach((input) => input.blur());

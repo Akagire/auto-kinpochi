@@ -1,9 +1,21 @@
-// const fs = require('fs');
-import puppeteer from 'puppeteer';
+import { existsSync } from 'fs';
+import { mkdir } from 'fs/promises';
+import { dirname, resolve } from 'path';
+import puppeteer, { ScreenshotOptions } from 'puppeteer';
 import moment from 'moment';
 
 import { parsedRecord } from '../formatter';
 import { projectSummary } from '../calc';
+
+async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptions): Promise<string | Buffer> {
+  const targetDir = dirname(resolve(options.path));
+  if (options.path != null && !existsSync(targetDir)) {
+    await mkdir(targetDir, {
+      recursive: true,
+    });
+  }
+  return page.screenshot(options);
+}
 
 export async function miteras(records: parsedRecord[], summary: projectSummary[], date?: string) {
   const today = moment(date).format('MM/DD/YYYY');
@@ -29,7 +41,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.click(`td.table01__cell--status button[data-date="${today}"]`);
   await page.waitFor(2000);
 
-  await page.screenshot({ path: 'debug/after_modal_open.png' });
+  await safeTakeScreenShot(page, { path: 'debug/after_modal_open.png' });
 
   // 勤務開始時刻・終了時刻・休憩時間を設定
   const start = records[0].start;
@@ -51,7 +63,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
     });
   }
 
-  await page.screenshot({ path: 'debug/after_workinout_input.png' });
+  await safeTakeScreenShot(page, { path: 'debug/after_workinout_input.png' });
 
   // プロジェクト別時間入力
   const cleanSummary = summary.filter((sum) => sum.code !== '');
@@ -80,7 +92,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
       document.getElementsByClassName('task-project-worktime')[position].value = time;
     }, i, cleanSummary[i].minutes);
 
-    await page.screenshot({ path: `debug/pulldown_${i}.png` });
+    await safeTakeScreenShot(page, { path: `debug/pulldown_${i}.png` });
   }
 
   // 承認ボタンクリック
@@ -88,8 +100,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
 
   await page.waitFor(4000);
 
-  await page.screenshot({ path: 'debug/after_input_project_summary.png' });
-
+  await safeTakeScreenShot(page, { path: 'debug/after_input_project_summary.png' });
 
   await browser.close();
 }

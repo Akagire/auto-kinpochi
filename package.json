@@ -11,8 +11,8 @@
     "kinpochi:dev": "ts-node src/index.ts"
   },
   "dependencies": {
+    "dayjs": "^1.8.34",
     "dotenv": "^8.2.0",
-    "moment": "^2.27.0",
     "puppeteer": "^5.1.0",
     "typescript": "^3.9.7"
   },

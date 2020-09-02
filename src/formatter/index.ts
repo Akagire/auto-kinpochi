@@ -1,10 +1,10 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { projectSummary } from '../calc';
 
 export interface parsedRecord {
   project: string;
-  start: moment.Moment | null;
-  end: moment.Moment | null;
+  start: dayjs.Dayjs | null;
+  end: dayjs.Dayjs | null;
   minutes: number;
   misc: string;
 }
@@ -26,21 +26,20 @@ export const parser = (line: string): parsedRecord => {
     const startObj = workStart.split(':');
     const endObj = workEnd.split(':');
 
-    const now = moment();
-    const today = moment({
-      year: now.year(),
-      month: now.month(),
-      date: now.date()
-    });
+    const now = dayjs();
+    const today = now.clone()
+        .hour(0)
+        .minute(0)
+        .second(0);
 
-    const start = today.clone().add(Number(startObj[0]), 'hours').add(Number(startObj[1]), 'minutes');
-    const end = today.clone().add(Number(endObj[0]), 'hours').add(Number(endObj[1]), 'minutes');
+    const start = today.clone().add(Number(startObj[0]), 'hour').add(Number(startObj[1]), 'minute');
+    const end = today.clone().add(Number(endObj[0]), 'hour').add(Number(endObj[1]), 'minute');
 
-    const diffMilisecs = end.diff(start);
+    const diffMilliSecs = end.diff(start);
 
-    if (diffMilisecs <= 0) throw new TypeError('作業開始時刻が作業終了時刻を上回っている分報があるようです！');
+    if (diffMilliSecs <= 0) throw new TypeError('作業開始時刻が作業終了時刻を上回っている分報があるようです！');
 
-    const diffMinutes = diffMilisecs / 1000 / 60;
+    const diffMinutes = diffMilliSecs / 1000 / 60;
 
     return {
       project: category,

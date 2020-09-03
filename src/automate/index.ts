@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import puppeteer, { ScreenshotOptions } from 'puppeteer';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import { parsedRecord } from '../formatter';
 import { projectSummary } from '../calc';
@@ -18,7 +18,7 @@ async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptio
 }
 
 export async function miteras(records: parsedRecord[], summary: projectSummary[], date?: string) {
-  const today = moment(date).format('MM/DD/YYYY');
+  const today = dayjs(date).format('MM/DD/YYYY');
 
   // puppeteer 初期化
   const browser = await puppeteer.launch();
@@ -34,8 +34,12 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.goto('https://kintai.miteras.jp/PCA/login');
   await page.type('#username', process.env.EMAIL);
   await page.type('#password', process.env.PASSWORD);
-  page.click('input.btnAction');
-  await page.waitFor(5000);
+
+  // ログインボタンをクリックして、ページ遷移完了まで待機する。
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+    page.click('input.btnAction'),
+  ]);
 
   // 指定日付の勤怠入力画面を開く
   await page.click(`td.table01__cell--status button[data-date="${today}"]`);

@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import puppeteer, { ScreenshotOptions } from 'puppeteer';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import { parsedRecord } from '../formatter';
 import { projectSummary } from '../calc';
@@ -18,7 +18,7 @@ async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptio
 }
 
 export async function miteras(records: parsedRecord[], summary: projectSummary[], date?: string) {
-  const today = moment(date).format('MM/DD/YYYY');
+  const today = dayjs(date).format('MM/DD/YYYY');
 
   // puppeteer 初期化
   const browser = await puppeteer.launch();

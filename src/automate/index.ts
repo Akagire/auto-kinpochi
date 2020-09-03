@@ -1,5 +1,4 @@
-import { existsSync } from 'fs';
-import { mkdir } from 'fs/promises';
+import { promises as fsPromise, existsSync } from 'fs';
 import { dirname, resolve } from 'path';
 import puppeteer, { ScreenshotOptions } from 'puppeteer';
 import dayjs from 'dayjs';
@@ -10,7 +9,7 @@ import { projectSummary } from '../calc';
 async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptions): Promise<string | Buffer> {
   const targetDir = dirname(resolve(options.path));
   if (options.path != null && !existsSync(targetDir)) {
-    await mkdir(targetDir, {
+    await fsPromise.mkdir(targetDir, {
       recursive: true,
     });
   }

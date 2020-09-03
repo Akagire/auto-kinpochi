@@ -1,12 +1,23 @@
-// const fs = require('fs');
-import puppeteer from 'puppeteer';
-import moment from 'moment';
+import { promises as fsPromise, existsSync } from 'fs';
+import { dirname, resolve } from 'path';
+import puppeteer, { ScreenshotOptions } from 'puppeteer';
+import dayjs from 'dayjs';
 
 import { parsedRecord } from '../formatter';
 import { projectSummary } from '../calc';
 
+async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptions): Promise<string | Buffer> {
+  const targetDir = dirname(resolve(options.path));
+  if (options.path != null && !existsSync(targetDir)) {
+    await fsPromise.mkdir(targetDir, {
+      recursive: true,
+    });
+  }
+  return page.screenshot(options);
+}
+
 export async function miteras(records: parsedRecord[], summary: projectSummary[], date?: string) {
-  const today = moment(date).format('MM/DD/YYYY');
+  const today = dayjs(date).format('MM/DD/YYYY');
 
   // puppeteer 初期化
   const browser = await puppeteer.launch();
@@ -22,14 +33,18 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.goto('https://kintai.miteras.jp/PCA/login');
   await page.type('#username', process.env.EMAIL);
   await page.type('#password', process.env.PASSWORD);
-  page.click('input.btnAction');
-  await page.waitFor(5000);
+
+  // ログインボタンをクリックして、ページ遷移完了まで待機する。
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+    page.click('input.btnAction'),
+  ]);
 
   // 指定日付の勤怠入力画面を開く
   await page.click(`td.table01__cell--status button[data-date="${today}"]`);
   await page.waitFor(2000);
 
-  await page.screenshot({ path: 'debug/after_modal_open.png' });
+  await safeTakeScreenShot(page, { path: 'debug/after_modal_open.png' });
 
   // 勤務開始時刻・終了時刻・休憩時間を設定
   const start = records[0].start;
@@ -40,18 +55,18 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
   await page.type('input#work-time-out', end.format('HH:mm'));
 
   for (let i = 0; i < rests.length; i += 1) {
-    const restStartElems = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-in');
-    const restEndElems = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-out');
+    const restStartElms = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-in');
+    const restEndElms = await page.$$('.formsTxtBox.formsTxtBox--time.break-time-input.time-input.work-time-out');
 
-    await restStartElems[i].type(rests[i].start.format('HH:mm'));
-    await restEndElems[i].type(rests[i].end.format('HH:mm'));
+    await restStartElms[i].type(rests[i].start.format('HH:mm'));
+    await restEndElms[i].type(rests[i].end.format('HH:mm'));
     await page.evaluate(() => {
       const inputs = document.querySelectorAll('input');
       inputs.forEach((input) => input.blur());
     });
   }
 
-  await page.screenshot({ path: 'debug/after_workinout_input.png' });
+  await safeTakeScreenShot(page, { path: 'debug/after_workinout_input.png' });
 
   // プロジェクト別時間入力
   const cleanSummary = summary.filter((sum) => sum.code !== '');
@@ -80,7 +95,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
       document.getElementsByClassName('task-project-worktime')[position].value = time;
     }, i, cleanSummary[i].minutes);
 
-    await page.screenshot({ path: `debug/pulldown_${i}.png` });
+    await safeTakeScreenShot(page, { path: `debug/pulldown_${i}.png` });
   }
 
   // 承認ボタンクリック
@@ -88,8 +103,7 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
 
   await page.waitFor(4000);
 
-  await page.screenshot({ path: 'debug/after_input_project_summary.png' });
-
+  await safeTakeScreenShot(page, { path: 'debug/after_input_project_summary.png' });
 
   await browser.close();
 }

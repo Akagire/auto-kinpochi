@@ -9,11 +9,12 @@ require('dotenv').config();
   const argDate = process.argv[2];
   const files = await fromFile('todaysjob.txt');
   const mapping = JSON.parse(await fromFile('mapping.json'));
+  const workStyles = JSON.parse(await fromFile('work_style.json'));
 
   const lines = files.split('\n');
 
   // @ts-ignore
-  const [date, ...withoutHeaderLine] = lines;
+  const [date, workStyleName, ...withoutHeaderLine] = lines;
 
   const converted = withoutHeaderLine
     .filter((line) => {
@@ -25,8 +26,10 @@ require('dotenv').config();
 
   // console.log(restCompleted);
 
+  const selectedWorkStyle = workStyles.find(workStyle => workStyle.name === workStyleName);
+
   const summary = summaryMinutesByProject(restCompleted);
   const mappedSummary = mappingProjectCode(summary, mapping);
 
-  miteras(restCompleted, mappedSummary, argDate);
+  miteras(restCompleted, selectedWorkStyle, mappedSummary, argDate);
 })();

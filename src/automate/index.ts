@@ -6,6 +6,12 @@ import dayjs from 'dayjs';
 import { parsedRecord } from '../formatter';
 import { projectSummary } from '../calc';
 
+// [MEMO] どこに書くのが適切か迷ったので手抜きました><（shooooori0128）
+interface workStyle {
+  name: string;
+  code: string;
+};
+
 async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptions): Promise<string | Buffer> {
   const targetDir = dirname(resolve(options.path));
   if (options.path != null && !existsSync(targetDir)) {
@@ -16,7 +22,7 @@ async function safeTakeScreenShot(page: puppeteer.Page, options: ScreenshotOptio
   return page.screenshot(options);
 }
 
-export async function miteras(records: parsedRecord[], summary: projectSummary[], date?: string) {
+export async function miteras(records: parsedRecord[], workStyle: workStyle, summary: projectSummary[], date?: string) {
   const today = dayjs(date).format('MM/DD/YYYY');
 
   // puppeteer 初期化
@@ -68,6 +74,11 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
 
   await safeTakeScreenShot(page, { path: 'debug/after_workinout_input.png' });
 
+  // 出社状況の登録
+  await page.select('#arriveAtWorkId', workStyle.code);
+
+  await safeTakeScreenShot(page, { path: 'debug/after_arrived_at_work_input.png' });
+
   // プロジェクト別時間入力
   const cleanSummary = summary.filter((sum) => sum.code !== '');
   for (let i = 0; i < cleanSummary.length; i += 1) {
@@ -100,6 +111,9 @@ export async function miteras(records: parsedRecord[], summary: projectSummary[]
 
   // 承認ボタンクリック
   await page.click('#request-approval-all');
+
+  // 一時保存ボタンクリック
+  // await page.click('#save-attendance-detail-entry');
 
   await page.waitFor(4000);
 
